@@ -1,28 +1,28 @@
-import css from './Filter.module.css';
-import { useDispatch, useSelector } from 'react-redux';
-import { setFilterValue } from 'redux/contacts/filterSlice';
-import {  selectFilterValue } from 'redux/contacts/selectors';
+import { FilterCont, Input } from './Filter.styled';
+import { useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { getFilterValue } from 'redux/selectors';
+import { setFilterValue } from 'redux/filter/slice';
 
 export default function Filter() {
-  const  filterValue = useSelector(selectFilterValue);
   const dispatch = useDispatch();
+  const filterValue = useSelector(getFilterValue);
 
-  const handleFilterChange = event => {
-    dispatch(setFilterValue(event.target.value));
+  const onSearchValue = e => {
+    dispatch(setFilterValue(e.target.value));
   };
 
   return (
-    <label className={css.search}>
-      <span className={css.searchName}>Find contacts by name</span>
-      <input
-      className={css.searchInp}
+    <FilterCont>
+      <label htmlFor="filter">Find contacts by name</label>
+
+      <Input
         type="text"
         value={filterValue}
-        onChange={handleFilterChange}
-        placeholder="Search contacts"
+        id="filter"
+        onChange={onSearchValue}
+        placeholder="Jacob Mercer"
       />
-    </label>
+    </FilterCont>
   );
 }
-
-

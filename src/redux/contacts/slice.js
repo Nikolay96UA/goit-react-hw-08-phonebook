@@ -1,10 +1,11 @@
 import { createSlice, isAnyOf } from '@reduxjs/toolkit';
-import { initialState } from './initialState';
+
 import {
-  createContactsThunk,
+  addContactThunk,
   deleteContactThunk,
   getContactsThunk,
-} from './Thunk';
+} from './operations';
+import { contactsInitialState } from '../inital';
 
 const STATUS = {
   PENDING: 'pending',
@@ -12,8 +13,8 @@ const STATUS = {
   REJECTED: 'rejected',
 };
 
-const thunksArray = [createContactsThunk, deleteContactThunk, getContactsThunk];
-const helpFn = type => thunksArray.map(el => el[type]);
+const thunksArr = [addContactThunk, deleteContactThunk, getContactsThunk];
+const helpFn = type => thunksArr.map(el => el[type]);
 const handleFulfilled = state => {
   state.isLoading = false;
   state.error = '';
@@ -40,7 +41,7 @@ const handleRejected = (state, { payload }) => {
 
 const contactsSlice = createSlice({
   name: 'contacts',
-  initialState: initialState,
+  initialState: contactsInitialState,
 
   extraReducers: builder => {
     const { PENDING, FULFILLED, REJECTED } = STATUS;
@@ -48,7 +49,7 @@ const contactsSlice = createSlice({
 
       .addCase(getContactsThunk.fulfilled, handleFulfilledGet)
 
-      .addCase(createContactsThunk.fulfilled, handleFulfilledAdd)
+      .addCase(addContactThunk.fulfilled, handleFulfilledAdd)
 
       .addCase(deleteContactThunk.fulfilled, handleFulfilledDel)
 

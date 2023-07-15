@@ -1,62 +1,85 @@
-import { nanoid } from 'nanoid';
-import css from './ContactForm.module.css';
+import PropTypes from 'prop-types';
+import { Formik, Form } from 'formik';
+import * as yup from 'yup';
+import React from 'react';
+import { toast } from 'react-toastify';
+
+
+import 'react-toastify/dist/ReactToastify.css';
+import { FormCont, Label, Btn, Input, ErrMessage } from './ContactForm.styled';
+
 import { useDispatch, useSelector } from 'react-redux';
-import { createContactsThunk } from 'redux/contacts/Thunk';
-import { selectContacts } from 'redux/contacts/selectors';
+import { getContacts } from 'redux/selectors';
+
+import { addContactThunk } from 'redux/contacts/operations';
+
+const schema = yup.object().shape({
+  name: yup
+    .string()
+    .matches(
+      /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/,
+      "Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
+    )
+    .required(),
+  number: yup
+    .string()
+    .matches(
+      /^\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/,
+      'Phone number must be digits and can contain spaces, dashes, parentheses and can start with +'
+    )
+    .required(),
+});
+
+const initialValues = {
+  name: '',
+  number: '',
+};
 
 export default function ContactForm() {
-  const items = useSelector(selectContacts);
-
+  const { items } = useSelector(getContacts);
   const dispatch = useDispatch();
 
-  const handleSubmit = e => {
-    e.preventDefault();
-
-    const name = e.target.name.value;
-    const number = e.target.number.value;
-
-    const newContact = {
-      id: nanoid(),
-      name,
-      number,
-    };
-    if (items.some(contact => contact.name === newContact.name)) {
-      alert(`${newContact.name} is already in contacts.`);
-      return;
-    } else {
-      dispatch(createContactsThunk(newContact));
-    }
-
-    e.target.reset();
+  const existedContact = (items, values) => {
+    return items.find(contact => contact.name === values.name);
   };
 
+  const handleSubmit = (values, { resetForm }) => {
+    if (existedContact(items, values)) {
+      toast(`${values.name} is already in contacts`);
+      resetForm();
+      return;
+    }
+
+    dispatch(addContactThunk(values));
+    resetForm();
+  };
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
-      <label className={css.label}>
-        <span className={css.labelName}> Name</span>
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          title="Name may contain only letters, apostrophe, dash and spaces."
-          required
-        />
-      </label>
-      <label className={css.label}>
-        <span className={css.labelName}> Number</span>
-        <input
-          type="tel"
-          name="number"
-          placeholder="Number"
-          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-          title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-          required
-        />
-      </label>
-      <button className={css.addBtn} type="submit">
-        Add contact
-      </button>
-    </form>
+    <Formik
+      initialValues={initialValues}
+      onSubmit={handleSubmit}
+      validationSchema={schema}
+    >
+      <Form autoComplete="off">
+        <FormCont>
+          <Label htmlFor="name">Name</Label>
+          <Input type="text" name="name" id="name" placeholder="Jacob Mercer" />
+          <ErrMessage name="name" component="div" />
+
+          <Label htmlFor="number">Phone</Label>
+          <Input
+            type="tel"
+            name="number"
+            id="number"
+            placeholder="080-111-77-55"
+          />
+          <ErrMessage name="number" component="div" />
+          <Btn type="submit">add contact</Btn>
+        </FormCont>
+      </Form>
+    </Formik>
   );
 }
+
+ContactForm.propTypes = {
+  data: PropTypes.func,
+};
