@@ -1,0 +1,28 @@
+.accent {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.contacts {
+  font-size: 17px;
+
+  color : white;
+  list-style: decimal;
+}
+
+.dltBtn {
+  width: 100px;
+  height: 30px;
+  color: white;
+  background-color: rgb(29, 28, 28);
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 5px;
+  transition: transform 0.3s;
+}
+
+.dltBtn:hover {
+  transform: translateX(-5px);
+  background-color: rgba(0, 0, 0, 0.544);
+}
